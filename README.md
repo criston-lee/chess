@@ -1,6 +1,6 @@
-# chess
+# Chessboard and Chess AI
 
-Partway through... so far what I've done is largely followed a tutorial, but the chessboard itself is funcational save for a few bugs e.g. can castle through check.
+Partway through... so far what I've done is largely following a tutorial, but the chessboard itself is funcational save for a few bugs e.g. can castle through check.
 
 Still need to add functionalities like premoves, and an AI component in the future!
 
