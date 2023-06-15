@@ -19,7 +19,9 @@ Current functionalities of Chessboard:
 ![image](https://github.com/criston-lee/chess/assets/123750477/78c1d7bb-957f-4760-9957-f3f168160c4a)
 
 
-Current posssible moves are highlighted previous move is highlighted too
+Current posssible moves are highlighted 
 
-Sorry the name is not very professional and board is a little small...will edit in next commit
+Previous move made is highlighted too
+
+Hope you enjoy :D
 
