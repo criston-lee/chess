@@ -23,5 +23,11 @@ Current posssible moves are highlighted
 
 Previous move made is highlighted too
 
+For future implementation:
+1. Make code cleaner
+2. Debug mistakes like castling through check
+3. Adding AI functionality
+4. Addding other features like premoves, undo moves
+
 Hope you enjoy :D
 
