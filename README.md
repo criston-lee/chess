@@ -6,8 +6,9 @@ Still need to add functionalities like premoves, and an AI component in the futu
 
 Current functionalities of Chessboard:
 
-Pressing T changes the Theme of the board 
-Pressing R resets the board
+1. Pressing T changes the Theme of the board 
+
+2. Pressing R resets the board
 
 # Screenshots of Game:
 ![image](https://github.com/criston-lee/chess/assets/123750477/856e4dec-1944-4ef5-b630-5c6b01feee32)
