@@ -335,74 +335,55 @@ class Board:
                         if bool:
                             if not self.in_check(piece, move):
                                 piece.add_move(move)
-                            else:
-                                break
+                                #NO BREAKING HERE, OR ELSE THE KING CANT MOVE
                         else:
                             piece.add_move(move)
 
             # Castling Moves
-
-            if not piece.moved:  # King has not moved
-
-                # Kingside Castle
+            if not piece.moved:
+                
+                # Kingside Castle (right rook)
                 right_rook = self.squares[row][7].piece
-                if isinstance(right_rook, Rook):
-                    if not right_rook.moved:
-                        for column in range(5, 7):
-                            if self.squares[row][column].has_piece():  # piece in between castle
+                if isinstance(right_rook, Rook) and not right_rook.moved:
+                    if (self.squares[row][5].is_empty() and self.squares[row][6].is_empty()):
+                        # Check if any square is under attack: current, in-between, and destination
+                        safe = True
+                        for col_check in [4, 5, 6]:  # king moves from col 4 to 6
+                            temp_initial = Square(row, 4)
+                            temp_final = Square(row, col_check)
+                            test_move = Move(temp_initial, temp_final)
+                            if self.in_check(piece, test_move):
+                                safe = False
                                 break
+                        if safe:
+                            piece.right_rook = right_rook
+                            moveK = Move(Square(row, 4), Square(row, 6))
+                            moveR = Move(Square(row, 7), Square(row, 5))
+                            if bool:
+                                piece.add_move(moveK)
+                                right_rook.add_move(moveR)
 
-                            if column == 6:
-                                # assigns right rook to king
-                                piece.right_rook = right_rook
-
-                                # rook move
-                                initial = Square(row, 7)
-                                final = Square(row, 5)
-                                moveR = Move(initial, final)
-
-                                # king move
-                                initial = Square(row, col)
-                                final = Square(row, 6)
-                                moveK = Move(initial, final)
-                                if bool: #check if there's a check / pin
-                                    if not self.in_check(piece, moveK) and not self.in_check(right_rook, moveR):
-                                        right_rook.add_move(moveR)
-                                        piece.add_move(moveK)
-                                else:
-                                    right_rook.add_move(moveR)
-                                    piece.add_move(moveK)
-
-
-                # Queenside Castle
+                # Queenside Castle (left rook)
                 left_rook = self.squares[row][0].piece
-                if isinstance(left_rook, Rook):
-                    if not left_rook.moved:
-                        for column in range(1, 4):
-                            if self.squares[row][column].has_piece():  # piece in between castle
+                if isinstance(left_rook, Rook) and not left_rook.moved:
+                    if (self.squares[row][1].is_empty() and
+                        self.squares[row][2].is_empty() and
+                        self.squares[row][3].is_empty()):
+                        safe = True
+                        for col_check in [4, 3, 2]:  # king moves from col 4 to 2
+                            temp_initial = Square(row, 4)
+                            temp_final = Square(row, col_check)
+                            test_move = Move(temp_initial, temp_final)
+                            if self.in_check(piece, test_move):
+                                safe = False
                                 break
-
-                            if column == 3:
-                                # assigns left rook to king
-                                piece.left_rook = left_rook
-
-                                # rook move
-                                initial = Square(row, 0)
-                                final = Square(row, 3)
-                                moveR = Move(initial, final)
-
-                                # king move
-                                initial = Square(row, col)
-                                final = Square(row, 2)
-                                moveK = Move(initial, final)
-                                if bool:
-                                    if not self.in_check(piece, moveK) and not self.in_check(left_rook, moveR):
-                                        # append new move to rook and king
-                                        left_rook.add_move(moveR)
-                                        piece.add_move(moveK)
-                                else:
-                                    left_rook.add_move(moveR)
-                                    piece.add_move(moveK)
+                        if safe:
+                            piece.left_rook = left_rook
+                            moveK = Move(Square(row, 4), Square(row, 2))
+                            moveR = Move(Square(row, 0), Square(row, 3))
+                            if bool:
+                                piece.add_move(moveK)
+                                left_rook.add_move(moveR)
 
 
         if piece.name == "pawn":
