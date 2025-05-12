@@ -17,6 +17,7 @@ class Game:
         #self.vs_ai = vs_ai
         #self.ai = AIPlayer(depth=3) if vs_ai else None
         self.game_over = False
+        self.game_result = ""
     
     #Blit methods
 
@@ -130,6 +131,27 @@ class Game:
         if self.board.is_checkmate(self.next_player):
             print(f"Checkmate! {self.next_player} loses.")
             self.game_over = True
+        elif self.board.is_stalemate(self.next_player):
+            print(f"Stalemate... It's a draw.")
+            self.game_over = True
+    
+    # def check_game_over(self): #Check if game has ended or not
+    #     if self.board.is_checkmate(self.next_player):
+    #         self.game_over = True
+    #         self.game_result = f"Checkmate! {self.next_player} loses."
+    #         print(f"Checkmate! {self.next_player} loses.")
+    #     elif self.board.is_stalemate(self.next_player):
+    #         self.game_over = True
+    #         self.game_result = "Stalemate! It's a draw."
+    #         print("Stalemate! It's a draw.")
+    
+    # def draw_game_over(self, surface): #prints message on screen if game is over, prints result from previous function
+    #     if self.game_over:
+    #         font = pygame.font.Font(None, 60)
+    #         text = font.render(self.game_result, True, (255, 0, 0))
+    #         text_rect = text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
+    #         pygame.draw.rect(surface, (0, 0, 0), text_rect.inflate(20, 20))
+    #         surface.blit(text, text_rect)
 
     # def try_ai_move(self):
     #     if self.vs_ai and self.next_player == "black" and not self.game_over:

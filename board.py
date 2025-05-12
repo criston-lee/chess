@@ -98,7 +98,7 @@ class Board:
 
         piece.en_passant = True
 
-    def in_check(self,piece,move):
+    def in_check(self,piece,move): #checks if ANY ENEMY MOVE can put us in check
         temp_board = copy.deepcopy(self) #clone board
         temp_piece = copy.deepcopy(piece)
         temp_board.move(temp_piece, move,testing=True)
@@ -113,6 +113,7 @@ class Board:
                             return True
 
         return False
+    
     def _add_pieces(self, color):
         if color == "white":
             row_pawn, row_other = (6, 7)  # White
@@ -423,26 +424,28 @@ class Board:
         elif piece.name == "king":
             king_moves()
 
-    def is_checkmate(self, color):
 
-        king_in_check = False
-
+    def is_in_check(self, color): #returns if king is currently in check or not
+        # Find king's position on board
+        king_piece = None
         for row in range(ROWS):
             for col in range(COLS):
-                square = self.squares[row][col]
-                if square.has_piece():
-                    piece = square.piece
-                    if isinstance(piece, King) and piece.color == color:
-                        king_square = Square(row, col, piece)
-                        # Fake a no-op move to use your in_check function
-                        fake_move = Move(king_square, king_square)
-                        king_in_check = self.in_check(piece, fake_move)
-                        break
+                piece = self.squares[row][col].piece
+                if isinstance(piece, King) and piece.color == color:
+                    king_piece = piece
+                    king_square = Square(row, col, piece)
+                    break
+            if king_piece:
+                break
 
-        if not king_in_check:
+        # Create a no-op move to simulate current board state
+        fake_move = Move(king_square, king_square)
+        return self.in_check(king_piece, fake_move)
+
+    def is_checkmate(self, color):
+        if not self.is_in_check(color):
             return False
 
-        # Now check if there are any legal moves available
         for row in range(ROWS):
             for col in range(COLS):
                 square = self.squares[row][col]
@@ -450,6 +453,19 @@ class Board:
                     piece = square.piece
                     self.calc_moves(piece, row, col, bool=True)
                     if piece.moves:
-                        return False  # At least one move avoids check
+                        return False  # At least one legal move
+        return True  # In check and no legal moves
+    
+    def is_stalemate(self, color):
+        if self.is_in_check(color):
+            return False
 
-        return True  # King is in check and no legal moves => checkmate
+        for row in range(ROWS):
+            for col in range(COLS):
+                square = self.squares[row][col]
+                if square.has_piece() and square.piece.color == color:
+                    piece = square.piece
+                    self.calc_moves(piece, row, col, bool=True)
+                    if piece.moves:
+                        return False  # Has legal move
+        return True  # Not in check, and no legal moves
