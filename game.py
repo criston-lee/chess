@@ -5,6 +5,7 @@ from dragger import Dragger
 from move import Move
 from config import Config
 from square import Square
+#from ai import AIPlayer
 
 class Game:
     def __init__(self):
@@ -13,6 +14,9 @@ class Game:
         self.board = Board()
         self.dragger = Dragger()
         self.config = Config()
+        #self.vs_ai = vs_ai
+        #self.ai = AIPlayer(depth=3) if vs_ai else None
+        self.game_over = False
     
     #Blit methods
 
@@ -122,6 +126,21 @@ class Game:
     def next_turn(self):
         self.next_player = 'white' if self.next_player == "black" else "black"
     
+    def check_game_over(self):
+        if self.board.is_checkmate(self.next_player):
+            print(f"Checkmate! {self.next_player} loses.")
+            self.game_over = True
+
+    # def try_ai_move(self):
+    #     if self.vs_ai and self.next_player == "black" and not self.game_over:
+    #         move = self.ai.get_best_move(self.board.squares, "black")
+    #         if move:
+    #             piece = self.board.squares[move.initial.row][move.initial.col].piece
+    #             self.board.move(piece, move)
+    #             self.play_sound()
+    #             self.next_turn()
+    #             self.check_game_over()
+    
 
     def set_hover(self,row,col):
         self.hovered_sqr = self.board.squares[row][col]
@@ -137,7 +156,3 @@ class Game:
 
     def reset(self):
         self.__init__()
-
-
-
-

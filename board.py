@@ -24,6 +24,7 @@ class Board:
         initial = move.initial
         final = move.final
 
+        #checks if target square is empty, for en passant ltr
         en_passant_empty = self.squares[final.row][final.col].is_empty()
 
         # console board move update
@@ -32,8 +33,15 @@ class Board:
 
         #Pawn Promotion & En Passant
         if isinstance(piece, Pawn):
-            # En Passant Capturing
-            if final.col - initial.col != 0 and en_passant_empty:
+            #En passant
+            if move.en_passant_move:
+            # Remove the captured pawn (diagonal, but square behind)
+                self.squares[initial.row][final.col].piece = None
+                if not testing:
+                    sound = Sound(os.path.join("assets/sounds/capture.wav"))
+                    sound.play()
+            # Promotion
+            elif final.col - initial.col != 0 and en_passant_empty:
                 self.squares[initial.row][final.col].piece = None
                 self.squares[final.row][final.col].piece = piece
                 if not testing:
@@ -57,6 +65,16 @@ class Board:
 
         # set last move
         self.last_move = move
+
+        # Clear all en passant flags
+        for row in self.squares:
+            for square in row:
+                if square.has_piece() and isinstance(square.piece, Pawn):
+                    square.piece.en_passant = False
+
+        # If pawn moved two squares, mark it as en passant target
+        if isinstance(piece, Pawn) and abs(final.row - initial.row) == 2:
+            piece.en_passant = True
 
     def valid_move(self, piece, move):
         return move in piece.moves
@@ -423,3 +441,34 @@ class Board:
 
         elif piece.name == "king":
             king_moves()
+
+    def is_checkmate(self, color):
+
+        king_in_check = False
+
+        for row in range(ROWS):
+            for col in range(COLS):
+                square = self.squares[row][col]
+                if square.has_piece():
+                    piece = square.piece
+                    if isinstance(piece, King) and piece.color == color:
+                        king_square = Square(row, col, piece)
+                        # Fake a no-op move to use your in_check function
+                        fake_move = Move(king_square, king_square)
+                        king_in_check = self.in_check(piece, fake_move)
+                        break
+
+        if not king_in_check:
+            return False
+
+        # Now check if there are any legal moves available
+        for row in range(ROWS):
+            for col in range(COLS):
+                square = self.squares[row][col]
+                if square.has_piece() and square.piece.color == color:
+                    piece = square.piece
+                    self.calc_moves(piece, row, col, bool=True)
+                    if piece.moves:
+                        return False  # At least one move avoids check
+
+        return True  # King is in check and no legal moves => checkmate

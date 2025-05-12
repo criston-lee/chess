@@ -1,5 +1,6 @@
 import pygame
 import sys
+
 from const import *
 from game import Game
 from square import Square
@@ -9,7 +10,7 @@ class Main:
     def __init__(self):
         pygame.init()
         self.screen = pygame.display.set_mode((WIDTH,HEIGHT))
-        pygame.display.set_caption("Personal Chessboard???")
+        pygame.display.set_caption("Personal Chessboard")
         self.game = Game()
 
     def mainloop(self):
@@ -109,7 +110,9 @@ class Main:
                             game.show_pieces(screen)
 
                             #next turn
-                            game.next_turn()                   
+                            game.next_turn() 
+
+                            game.check_game_over()                  
                     
                     dragger.undrag_piece()
 
