@@ -98,7 +98,7 @@ class Board:
 
         piece.en_passant = True
 
-    def in_check(self,piece,move): #checks if ANY ENEMY MOVE can put us in check
+    def in_check(self,piece,move): #Checks if ANY move made by the opponent can put us in check
         temp_board = copy.deepcopy(self) #clone board
         temp_piece = copy.deepcopy(piece)
         temp_board.move(temp_piece, move,testing=True)
@@ -114,6 +114,7 @@ class Board:
 
         return False
     
+
     def _add_pieces(self, color):
         if color == "white":
             row_pawn, row_other = (6, 7)  # White
@@ -424,7 +425,6 @@ class Board:
         elif piece.name == "king":
             king_moves()
 
-
     def is_in_check(self, color): #returns if king is currently in check or not
         # Find king's position on board
         king_piece = None
@@ -468,4 +468,4 @@ class Board:
                     self.calc_moves(piece, row, col, bool=True)
                     if piece.moves:
                         return False  # Has legal move
-        return True  # Not in check, and no legal moves
+        return True  # Not in check, and no legal moves to be made
