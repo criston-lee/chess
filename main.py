@@ -1,6 +1,7 @@
 import pygame
 import sys
 import random
+import traceback
 
 from const import *
 from game import Game
@@ -67,34 +68,57 @@ class Main:
                 if self.mode == "title":
                     if event.type == pygame.MOUSEBUTTONDOWN:
                         if self.hvh_button.collidepoint(event.pos):
+                            print("Selected Human vs Human mode")
                             self.mode = "game"
+                            game.vs_ai = False
+                            game.ai = None
                             self.player_color = "white"  # Human vs Human both default to white
 
                         elif self.hvai_button.collidepoint(event.pos):
+                            print("Selected Human vs AI mode")
                             self.mode = "game"
+                            # Randomly assign human to white or black
                             self.player_color = random.choice(["white", "black"])
-                            self.game.set_ai_mode(enable=True)
-                            print("Human is:", self.player_color)
+                            # AI gets the opposite color
+                            ai_color = "black" if self.player_color == "white" else "white"
+                            print(f"Human is: {self.player_color}, AI is: {ai_color}")
+                            
+                            game.set_ai_mode(enable=True, ai_color=ai_color, depth=1) #adjust difficulty here
+                            
+                            # If AI is white, it should make the first move
+                            if ai_color == "white":
+                                print("AI should make first move")
+                                pygame.display.update()  # Update display before AI thinks
+                                game.try_ai_move()
 
                 elif self.mode == "game":
+                    # Only allow the human player to interact when it's their turn
+                    human_turn = (not game.vs_ai) or (game.next_player == self.player_color)
+                    
                     if event.type == pygame.MOUSEBUTTONDOWN:
-                        dragger.update_mouse(event.pos)
-                        clicked_row = dragger.mouseY // SQSIZE
-                        clicked_col = dragger.mouseX // SQSIZE
+                        if human_turn:
+                            dragger.update_mouse(event.pos)
+                            clicked_row = dragger.mouseY // SQSIZE
+                            clicked_col = dragger.mouseX // SQSIZE
 
-                        if board.squares[clicked_row][clicked_col].has_piece():
-                            piece = board.squares[clicked_row][clicked_col].piece
-                            if piece.color == game.next_player:
-                                board.calc_moves(piece, clicked_row, clicked_col, bool=True)
-                                dragger.save_initial(event.pos)
-                                dragger.drag_piece(piece)
-                                game.show_bg(screen)
-                                game.show_moves(screen)
+                            # Safety check
+                            if 0 <= clicked_row < ROWS and 0 <= clicked_col < COLS:
+                                if board.squares[clicked_row][clicked_col].has_piece():
+                                    piece = board.squares[clicked_row][clicked_col].piece
+                                    if piece.color == game.next_player:
+                                        board.calc_moves(piece, clicked_row, clicked_col, bool=True)
+                                        dragger.save_initial(event.pos)
+                                        dragger.drag_piece(piece)
+                                        game.show_bg(screen)
+                                        game.show_moves(screen)
 
                     elif event.type == pygame.MOUSEMOTION:
                         motion_row = event.pos[1] // SQSIZE
                         motion_col = event.pos[0] // SQSIZE
-                        game.set_hover(motion_row, motion_col)
+                        
+                        # Safety check
+                        if 0 <= motion_row < ROWS and 0 <= motion_col < COLS:
+                            game.set_hover(motion_row, motion_col)
 
                         if dragger.dragging:
                             dragger.update_mouse(event.pos)
@@ -106,25 +130,27 @@ class Main:
                             dragger.update_blit(screen)
 
                     elif event.type == pygame.MOUSEBUTTONUP:
-                        if dragger.dragging:
+                        if human_turn and dragger.dragging:
                             dragger.update_mouse(event.pos)
                             released_row = dragger.mouseY // SQSIZE
                             released_col = dragger.mouseX // SQSIZE
 
-                            initial = Square(dragger.initial_row, dragger.initial_col)
-                            final = Square(released_row, released_col)
-                            move = Move(initial, final)
+                            # Safety check
+                            if 0 <= released_row < ROWS and 0 <= released_col < COLS:
+                                initial = Square(dragger.initial_row, dragger.initial_col)
+                                final = Square(released_row, released_col)
+                                move = Move(initial, final)
 
-                            if board.valid_move(dragger.piece, move):
-                                captured = board.squares[released_row][released_col].has_piece()
-                                board.move(dragger.piece, move)
-                                board.set_true_en_passant(dragger.piece)
-                                game.play_sound(captured)
-                                game.show_bg(screen)
-                                game.show_last_move(screen)
-                                game.show_pieces(screen)
-                                game.next_turn()
-                                game.check_game_over_checkmate()
+                                if board.valid_move(dragger.piece, move):
+                                    captured = board.squares[released_row][released_col].has_piece()
+                                    board.move(dragger.piece, move)
+                                    board.set_true_en_passant(dragger.piece)
+                                    game.play_sound(captured)
+                                    game.show_bg(screen)
+                                    game.show_last_move(screen)
+                                    game.show_pieces(screen)
+                                    game.next_turn()
+                                    game.check_game_over()
 
                         dragger.undrag_piece()
 
@@ -132,12 +158,15 @@ class Main:
                         if event.key == pygame.K_t:
                             game.change_theme()
                         elif event.key == pygame.K_r:
+                            print("Resetting game")
                             game.reset()
+                            self.mode = "title"  # Reset to title screen
                             game = self.game
                             board = self.game.board
                             dragger = self.game.dragger
 
             pygame.display.update()
+        
 
 
 if __name__ == "__main__":

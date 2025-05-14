@@ -5,7 +5,7 @@ from dragger import Dragger
 from move import Move
 from config import Config
 from square import Square
-#from ai import AIPlayer
+from ai import AIPlayer
 
 class Game:
     def __init__(self):
@@ -14,11 +14,12 @@ class Game:
         self.board = Board()
         self.dragger = Dragger()
         self.config = Config()
-        #self.vs_ai = vs_ai
-        #self.ai = AIPlayer(depth=3) if vs_ai else None
+        self.vs_ai = False
+        self.ai = None
+        self.ai_color = None
         self.game_over = False
-        self.game_result = ""
     
+        
     #Blit methods
 
     def show_bg(self,surface):
@@ -126,42 +127,44 @@ class Game:
     #Other methods
     def next_turn(self):
         self.next_player = 'white' if self.next_player == "black" else "black"
+        
+        # After changing turn, check if it's AI's turn
+        self.try_ai_move()
     
-    def check_game_over(self):
-        if self.board.is_checkmate(self.next_player):
+    def check_game_over_checkmate(self):
+        if self.board.is_checkmate(self.next_player) and self.game_over == False:
             print(f"Checkmate! {self.next_player} loses.")
             self.game_over = True
-        elif self.board.is_stalemate(self.next_player):
-            print(f"Stalemate... It's a draw.")
+            return True
+        return False
+    
+    def check_game_over_stalemate(self):
+        if self.board.is_stalemate(self.next_player) and self.game_over == False:
+            print(f"Stalemate...It's a Draw.")
             self.game_over = True
+            return True
+        return False
     
-    # def check_game_over(self): #Check if game has ended or not
-    #     if self.board.is_checkmate(self.next_player):
-    #         self.game_over = True
-    #         self.game_result = f"Checkmate! {self.next_player} loses."
-    #         print(f"Checkmate! {self.next_player} loses.")
-    #     elif self.board.is_stalemate(self.next_player):
-    #         self.game_over = True
-    #         self.game_result = "Stalemate! It's a draw."
-    #         print("Stalemate! It's a draw.")
+    def check_game_over(self):
+        return self.check_game_over_checkmate() or self.check_game_over_stalemate()
     
-    # def draw_game_over(self, surface): #prints message on screen if game is over, prints result from previous function
-    #     if self.game_over:
-    #         font = pygame.font.Font(None, 60)
-    #         text = font.render(self.game_result, True, (255, 0, 0))
-    #         text_rect = text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
-    #         pygame.draw.rect(surface, (0, 0, 0), text_rect.inflate(20, 20))
-    #         surface.blit(text, text_rect)
-
-    # def try_ai_move(self):
-    #     if self.vs_ai and self.next_player == "black" and not self.game_over:
-    #         move = self.ai.get_best_move(self.board.squares, "black")
-    #         if move:
-    #             piece = self.board.squares[move.initial.row][move.initial.col].piece
-    #             self.board.move(piece, move)
-    #             self.play_sound()
-    #             self.next_turn()
-    #             self.check_game_over()
+    def try_ai_move(self):
+        if self.vs_ai and self.next_player == self.ai_color and not self.game_over:
+            move = self.ai.get_best_move(self.board.squares, self.ai_color)
+            if move:
+                piece = self.board.squares[move.initial.row][move.initial.col].piece
+                # Check if it's a capture
+                captured = self.board.squares[move.final.row][move.final.col].has_piece()
+                self.board.move(piece, move)
+                self.board.set_true_en_passant(piece)
+                self.play_sound(captured)
+                self.next_player = 'white' if self.next_player == "black" else "black"
+                self.check_game_over()
+    
+    def set_ai_mode(self, enable=True, ai_color="black", depth=3):
+        self.vs_ai = enable
+        self.ai_color = ai_color
+        self.ai = AIPlayer(depth=depth) if enable else None
     
 
     def set_hover(self,row,col):
