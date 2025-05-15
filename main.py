@@ -110,7 +110,7 @@ class Main:
                             print(f"Human is: {self.player_color}, AI is: {ai_color}")
                             
                             # Use neural network, depth 2
-                            game.set_ai_mode(enable=True, ai_color=ai_color, depth=2, use_nn=True) 
+                            game.set_ai_mode(enable=True, ai_color=ai_color, depth=1, use_nn=True) 
                             
                             # If AI is white, it should make the first move
                             if ai_color == "white":

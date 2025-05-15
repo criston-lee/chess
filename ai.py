@@ -232,7 +232,7 @@ class ModelBuilder:
 
 # Neural Network evaluator using TensorFlow model with better error handling
 class NeuralNetworkEvaluator:
-    def __init__(self, model_path="./ai_models/TF_50EPOCHS.keras"):
+    def __init__(self, model_path="./ai_models/TF_1EPOCHS.h5"):
         self.model = None
         
         # Try to load the model with improved error handling
