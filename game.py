@@ -58,9 +58,6 @@ class Game:
                     surface.blit(lbl, lbl_pos)
 
 
-
-
-
     def show_pieces(self,surface):
         for row in range(ROWS):
             for col in range(COLS):
@@ -146,7 +143,7 @@ class Game:
         return False
     
     def check_game_over(self):
-        return self.check_game_over_checkmate() or self.check_game_over_stalemate()
+        return self.check_game_over_checkmate() #or self.check_game_over_stalemate()
     
     def try_ai_move(self):
         if self.vs_ai and self.next_player == self.ai_color and not self.game_over:
@@ -161,12 +158,11 @@ class Game:
                 self.next_player = 'white' if self.next_player == "black" else "black"
                 self.check_game_over()
     
-    def set_ai_mode(self, enable=True, ai_color="black", depth=3):
+    def set_ai_mode(self, enable=True, ai_color="black", depth=3, use_nn=True):
         self.vs_ai = enable
         self.ai_color = ai_color
-        self.ai = AIPlayer(depth=depth) if enable else None
+        self.ai = AIPlayer(depth=depth, use_nn=use_nn) if enable else None
     
-
     def set_hover(self,row,col):
         self.hovered_sqr = self.board.squares[row][col]
 

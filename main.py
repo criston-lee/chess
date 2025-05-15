@@ -17,29 +17,37 @@ class Main:
         self.mode = "title"
         self.player_color = None
 
-        # Define buttons
-        self.hvh_button = pygame.Rect(WIDTH // 2 - 150, HEIGHT // 2 - 70, 300, 60)
-        self.hvai_button = pygame.Rect(WIDTH // 2 - 150, HEIGHT // 2 + 10, 300, 60)
+        # Define buttons for the main menu
+        self.hvh_button = pygame.Rect(WIDTH // 2 - 150, HEIGHT // 2 - 100, 300, 60)
+        self.hvai_button = pygame.Rect(WIDTH // 2 - 150, HEIGHT // 2 - 20, 300, 60)
+        self.ai_advanced_button = pygame.Rect(WIDTH // 2 - 150, HEIGHT // 2 + 60, 300, 60)
 
     def draw_title_screen(self):
         self.screen.fill((30, 30, 30))
         font = pygame.font.SysFont("arial", 60)
         small_font = pygame.font.SysFont("arial", 36)
 
-        title_text = font.render("Choose Game Mode", True, (255, 255, 255))
-        self.screen.blit(title_text, (WIDTH // 2 - title_text.get_width() // 2, 100))
+        title_text = font.render("Chess Game", True, (255, 255, 255))
+        self.screen.blit(title_text, (WIDTH // 2 - title_text.get_width() // 2, 50))
 
+        # Draw buttons
         pygame.draw.rect(self.screen, (70, 130, 180), self.hvh_button)
         pygame.draw.rect(self.screen, (180, 70, 70), self.hvai_button)
+        pygame.draw.rect(self.screen, (70, 180, 70), self.ai_advanced_button)
 
+        # Draw button text
         hvh_text = small_font.render("Human vs Human", True, (255, 255, 255))
-        hvai_text = small_font.render("Human vs AI", True, (255, 255, 255))
+        hvai_text = small_font.render("Human vs AI (Basic)", True, (255, 255, 255))
+        ai_advanced_text = small_font.render("Human vs AI (Neural Net)", True, (255, 255, 255))
 
         self.screen.blit(hvh_text, (self.hvh_button.centerx - hvh_text.get_width() // 2,
                                     self.hvh_button.centery - hvh_text.get_height() // 2))
 
         self.screen.blit(hvai_text, (self.hvai_button.centerx - hvai_text.get_width() // 2,
                                      self.hvai_button.centery - hvai_text.get_height() // 2))
+                                     
+        self.screen.blit(ai_advanced_text, (self.ai_advanced_button.centerx - ai_advanced_text.get_width() // 2,
+                                     self.ai_advanced_button.centery - ai_advanced_text.get_height() // 2))
 
     def mainloop(self):
         game = self.game
@@ -75,7 +83,7 @@ class Main:
                             self.player_color = "white"  # Human vs Human both default to white
 
                         elif self.hvai_button.collidepoint(event.pos):
-                            print("Selected Human vs AI mode")
+                            print("Selected Human vs AI (Basic) mode")
                             self.mode = "game"
                             # Randomly assign human to white or black
                             self.player_color = random.choice(["white", "black"])
@@ -83,7 +91,26 @@ class Main:
                             ai_color = "black" if self.player_color == "white" else "white"
                             print(f"Human is: {self.player_color}, AI is: {ai_color}")
                             
-                            game.set_ai_mode(enable=True, ai_color=ai_color, depth=1) #adjust difficulty here
+                            # Use simple evaluation, depth 2
+                            game.set_ai_mode(enable=True, ai_color=ai_color, depth=2, use_nn=False) 
+                            
+                            # If AI is white, it should make the first move
+                            if ai_color == "white":
+                                print("AI should make first move")
+                                pygame.display.update()  # Update display before AI thinks
+                                game.try_ai_move()
+                                
+                        elif self.ai_advanced_button.collidepoint(event.pos):
+                            print("Selected Human vs AI (Neural Net) mode")
+                            self.mode = "game"
+                            # Randomly assign human to white or black
+                            self.player_color = random.choice(["white", "black"])
+                            # AI gets the opposite color
+                            ai_color = "black" if self.player_color == "white" else "white"
+                            print(f"Human is: {self.player_color}, AI is: {ai_color}")
+                            
+                            # Use neural network, depth 2
+                            game.set_ai_mode(enable=True, ai_color=ai_color, depth=2, use_nn=True) 
                             
                             # If AI is white, it should make the first move
                             if ai_color == "white":
